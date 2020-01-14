@@ -18,6 +18,11 @@ flags:
   -s, --rust-files           search for rust files
 ```
 
+### Install
+```bash
+$ go install github.com/phenixrizen/hunt
+```
+
 ### Examples
 
 Hunt for Go and C source files that have "Accept-Encoding" or "User-Agent" in the code:

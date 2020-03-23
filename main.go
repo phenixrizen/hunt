@@ -20,6 +20,8 @@ var fExprs = make([]*regexp.Regexp, 0)
 var found = 0
 var wg sync.WaitGroup
 
+// bufio this is a test bufio plus some more code bufio this is a test bufio plus some more code bufio this is a test butt bufio plus some more code
+
 func readFile(wg *sync.WaitGroup, path string) {
 	defer wg.Done()
 
@@ -31,13 +33,22 @@ func readFile(wg *sync.WaitGroup, path string) {
 	}
 	scanner := bufio.NewScanner(file)
 	for i := 1; scanner.Scan(); i++ {
-		txt := scanner.Text()
-		if qExpr.Match([]byte(txt)) {
+		code := strings.TrimSpace(scanner.Text())
+		matches := qExpr.FindAllStringSubmatchIndex(code, -1)
+		if len(matches) > 0 {
 			found++
 			blue := color.New(color.FgBlue).SprintFunc()
 			white := color.New(color.FgWhite).SprintFunc()
+			green := color.New(color.FgGreen).SprintFunc()
 			red := color.New(color.FgRed).SprintFunc()
-			fmt.Printf("%s:%s    %s\n", blue(path), red(fmt.Sprintf("%d", i)), white(strings.TrimSpace(txt)))
+			output := fmt.Sprintf("%s:%s\t", blue(path), green(fmt.Sprintf("%d", i)))
+			idx := 0
+			for _, match := range matches {
+				output = fmt.Sprintf("%s%s%s", output, white(code[idx:match[0]]), red(code[match[0]:match[1]]))
+				idx = match[1]
+			}
+			output = fmt.Sprintf("%s%s", output, code[idx:])
+			fmt.Printf("%s\n", output)
 
 		}
 	}
@@ -60,7 +71,7 @@ func checkErr(err error) {
 
 func main() {
 	pflag.StringVarP(&query, "query", "q", "", "regexp to match source content")
-	pflag.StringVarP(&root, "root", "r", "", "root to start your hunt")
+	pflag.StringVarP(&root, "root", "r", ".", "root to start your hunt")
 	pflag.StringVarP(&filenameRegEx, "name-regexp", "n", "", "regexp to match the filename")
 	pflag.BoolVarP(&cFiles, "c-files", "c", false, "search for c/c++ files")
 	pflag.BoolVarP(&goFiles, "go-files", "g", false, "search for Go files")

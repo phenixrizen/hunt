@@ -20,8 +20,6 @@ var fExprs = make([]*regexp.Regexp, 0)
 var found = 0
 var wg sync.WaitGroup
 
-// bufio this is a test bufio plus some more code bufio this is a test bufio plus some more code bufio this is a test butt bufio plus some more code
-
 func readFile(wg *sync.WaitGroup, path string) {
 	defer wg.Done()
 

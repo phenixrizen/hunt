@@ -39,7 +39,7 @@ func readFile(wg *sync.WaitGroup, path string) {
 			white := color.New(color.FgWhite).SprintFunc()
 			green := color.New(color.FgGreen).SprintFunc()
 			red := color.New(color.FgRed).SprintFunc()
-			output := fmt.Sprintf("%s:%s\t", blue(path), green(fmt.Sprintf("%d", i)))
+			output := fmt.Sprintf("%s:%s    ", blue(path), green(fmt.Sprintf("%d", i)))
 			idx := 0
 			for _, match := range matches {
 				output = fmt.Sprintf("%s%s%s", output, white(code[idx:match[0]]), red(code[match[0]:match[1]]))
@@ -124,7 +124,10 @@ func main() {
 		}
 	}
 
-	fmt.Printf("Hunting for -> %s in %s\n\n", query, root)
+	red := color.New(color.FgRed).SprintFunc()
+	blue := color.New(color.FgBlue).SprintFunc()
+
+	fmt.Printf("Hunting for -> '%s' in '%s'\n\n", red(query), blue(root))
 	godirwalk.Walk(root, &godirwalk.Options{
 		Unsorted: true,
 		Callback: func(path string, de *godirwalk.Dirent) error {
@@ -154,7 +157,6 @@ func main() {
 
 	wg.Wait()
 
-	red := color.New(color.FgRed).SprintFunc()
 	fmt.Printf("\n%s occurences found\n", red(fmt.Sprintf("%d", found)))
 
 	os.Exit(found)

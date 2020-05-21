@@ -13,8 +13,9 @@ import (
 	"github.com/spf13/pflag"
 )
 
-var root, query, filenameRegEx string
+var root, query, filenameRegEx, ignoreRegEx string
 var cFiles, goFiles, rustFiles, rubyFiles, jsFiles bool
+var ignore *regexp.Regexp
 var qExpr *regexp.Regexp
 var fExprs = make([]*regexp.Regexp, 0)
 var found = 0
@@ -71,6 +72,7 @@ func main() {
 	pflag.StringVarP(&query, "query", "q", "", "regexp to match source content")
 	pflag.StringVarP(&root, "root", "r", ".", "root to start your hunt")
 	pflag.StringVarP(&filenameRegEx, "name-regexp", "n", "", "regexp to match the filename")
+	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "\\.git", "regexp to ignore matching the filename")
 	pflag.BoolVarP(&cFiles, "c-files", "c", false, "search for c/c++ files")
 	pflag.BoolVarP(&goFiles, "go-files", "g", false, "search for Go files")
 	pflag.BoolVarP(&rustFiles, "rust-files", "s", false, "search for rust files")
@@ -127,11 +129,14 @@ func main() {
 	red := color.New(color.FgRed).SprintFunc()
 	blue := color.New(color.FgBlue).SprintFunc()
 
+	ignoreExpr, err := compExp(ignoreRegEx)
+	checkErr(err)
+
 	fmt.Printf("Hunting for -> '%s' in '%s'\n\n", red(query), blue(root))
 	godirwalk.Walk(root, &godirwalk.Options{
 		Unsorted: true,
 		Callback: func(path string, de *godirwalk.Dirent) error {
-			if !de.IsDir() {
+			if !de.IsDir() && !ignoreExpr.MatchString(path) {
 				match := false
 				if len(fExprs) == 0 {
 					match = true

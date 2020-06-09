@@ -30,3 +30,7 @@ Hunt for Go and C source files that have "Accept-Encoding" or "User-Agent" in th
 ```bash
 $ hunt --query "Accept-Encoding|User-Agent" --root . --go-files --c-files
 ```
+Or short flags:
+```bash
+$ hunt -q "Accept-Encoding|User-Agent" -g -c
+```

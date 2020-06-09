@@ -8,14 +8,15 @@ hunt - a simple way to hunt for content in source files
 usage: hunt -query "foo bar" -root .
 
 flags:
-  -c, --c-files              search for c/c++ files
-  -g, --go-files             search for Go files
-  -j, --js-files             search for JavaScript files
-  -n, --name-regexp string   regexp to match the filename
-  -q, --query string         regexp to match source content
-  -r, --root string          root to start your hunt
-  -b, --ruby-files           search for ruby files
-  -s, --rust-files           search for rust files
+  -c, --c-files                search for c/c++ files
+  -g, --go-files               search for Go files
+  -i, --ignore-regexp string   regexp to ignore matching the filename (default "\\.git")
+  -j, --js-files               search for JavaScript files
+  -n, --name-regexp string     regexp to match the filename
+  -q, --query string           regexp to match source content
+  -r, --root string            root to start your hunt (default ".")
+  -b, --ruby-files             search for ruby files
+  -s, --rust-files             search for rust files
 ```
 
 ### Install

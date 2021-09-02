@@ -72,7 +72,7 @@ func main() {
 	pflag.StringVarP(&query, "query", "q", "", "regexp to match source content")
 	pflag.StringVarP(&root, "root", "r", ".", "root to start your hunt")
 	pflag.StringVarP(&filenameRegEx, "name-regexp", "n", "", "regexp to match the filename")
-	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "\\.git", "regexp to ignore matching the filename")
+	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "\\.git|vendor", "regexp to ignore matching the filename")
 	pflag.BoolVarP(&cFiles, "c-files", "c", false, "search for c/c++ files")
 	pflag.BoolVarP(&goFiles, "go-files", "g", false, "search for Go files")
 	pflag.BoolVarP(&rustFiles, "rust-files", "s", false, "search for rust files")

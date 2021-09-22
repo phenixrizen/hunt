@@ -16,7 +16,7 @@ import (
 )
 
 var root, query, filenameRegEx, ignoreRegEx string
-var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit bool
+var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit, showCode bool
 var ignore *regexp.Regexp
 var qExpr *regexp.Regexp
 var fExprs = make([]*regexp.Regexp, 0)
@@ -49,7 +49,10 @@ func readFile(wg *sync.WaitGroup, path string) {
 				output = fmt.Sprintf("%s%s%s", output, white(code[idx:match[0]]), red(code[match[0]:match[1]]))
 				idx = match[1]
 			}
-			output = fmt.Sprintf("%s%s", output, code[idx:])
+
+			if showCode {
+				output = fmt.Sprintf("%s%s", output, code[idx:])
+			}
 
 			if gitCommit {
 				gitLog, err := exec.Command("git", "log", fmt.Sprintf("-L%d,+1:%s", i, path), "--pretty=format:\"%h - %an, %ar : %s\"").CombinedOutput()
@@ -94,6 +97,7 @@ func main() {
 	pflag.BoolVarP(&rubyFiles, "ruby-files", "b", false, "search for ruby files")
 	pflag.BoolVarP(&jsFiles, "js-files", "j", false, "search for JavaScript files")
 	pflag.BoolVarP(&gitCommit, "git-commit", "h", false, "git the git commit details for the found line")
+	pflag.BoolVarP(&showCode, "show-code", "v", true, "show the matching line of code")
 	pflag.Parse()
 
 	if pflag.NFlag() == 0 || root == "" {

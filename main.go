@@ -16,12 +16,35 @@ import (
 )
 
 var root, query, filenameRegEx, ignoreRegEx string
-var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit, showCode bool
+var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit, removeCode bool
 var ignore *regexp.Regexp
 var qExpr *regexp.Regexp
 var fExprs = make([]*regexp.Regexp, 0)
 var found = 0
 var wg sync.WaitGroup
+
+func init() {
+	pflag.StringVarP(&query, "query", "q", "", "regexp to match source content")
+	pflag.StringVarP(&root, "root", "r", ".", "root to start your hunt")
+	pflag.StringVarP(&filenameRegEx, "name-regexp", "n", "", "regexp to match the filename")
+	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "^\\.git|^vendor", "regexp to ignore matching the filename")
+	pflag.BoolVarP(&cFiles, "c-files", "c", false, "search for c/c++ files")
+	pflag.BoolVarP(&goFiles, "go-files", "g", false, "search for Go files")
+	pflag.BoolVarP(&rustFiles, "rust-files", "s", false, "search for rust files")
+	pflag.BoolVarP(&rubyFiles, "ruby-files", "b", false, "search for ruby files")
+	pflag.BoolVarP(&jsFiles, "js-files", "j", false, "search for JavaScript files")
+	pflag.BoolVarP(&gitCommit, "git-commit", "h", false, "git the git commit details for the found line")
+	pflag.BoolVarP(&removeCode, "remove-code", "v", false, "do not show the matching line of code")
+	pflag.Parse()
+
+	if pflag.NFlag() == 0 || root == "" {
+		fmt.Println("hunt - a simple way to hunt for content in source files\n")
+		fmt.Println("usage: hunt -query \"foo bar\" -root .\n")
+		fmt.Println("flags:")
+		pflag.PrintDefaults()
+		os.Exit(-1)
+	}
+}
 
 func readFile(wg *sync.WaitGroup, path string) {
 	defer wg.Done()
@@ -45,12 +68,13 @@ func readFile(wg *sync.WaitGroup, path string) {
 			yellow := color.New(color.FgYellow).SprintfFunc()
 			output := fmt.Sprintf("%s:%s    ", blue(path), green(fmt.Sprintf("%d", i)))
 			idx := 0
-			for _, match := range matches {
-				output = fmt.Sprintf("%s%s%s", output, white(code[idx:match[0]]), red(code[match[0]:match[1]]))
-				idx = match[1]
-			}
 
-			if showCode {
+			if !removeCode {
+				for _, match := range matches {
+					output = fmt.Sprintf("%s%s%s", output, white(code[idx:match[0]]), red(code[match[0]:match[1]]))
+					idx = match[1]
+				}
+
 				output = fmt.Sprintf("%s%s", output, code[idx:])
 			}
 
@@ -87,26 +111,6 @@ func checkErr(err error) {
 }
 
 func main() {
-	pflag.StringVarP(&query, "query", "q", "", "regexp to match source content")
-	pflag.StringVarP(&root, "root", "r", ".", "root to start your hunt")
-	pflag.StringVarP(&filenameRegEx, "name-regexp", "n", "", "regexp to match the filename")
-	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "^\\.git|^vendor", "regexp to ignore matching the filename")
-	pflag.BoolVarP(&cFiles, "c-files", "c", false, "search for c/c++ files")
-	pflag.BoolVarP(&goFiles, "go-files", "g", false, "search for Go files")
-	pflag.BoolVarP(&rustFiles, "rust-files", "s", false, "search for rust files")
-	pflag.BoolVarP(&rubyFiles, "ruby-files", "b", false, "search for ruby files")
-	pflag.BoolVarP(&jsFiles, "js-files", "j", false, "search for JavaScript files")
-	pflag.BoolVarP(&gitCommit, "git-commit", "h", false, "git the git commit details for the found line")
-	pflag.BoolVarP(&showCode, "show-code", "v", true, "show the matching line of code")
-	pflag.Parse()
-
-	if pflag.NFlag() == 0 || root == "" {
-		fmt.Println("hunt - a simple way to hunt for content in source files\n")
-		fmt.Println("usage: hunt -query \"foo bar\" -root .\n")
-		fmt.Println("flags:")
-		pflag.PrintDefaults()
-		os.Exit(-1)
-	}
 
 	expr, err := compExp(query)
 	checkErr(err)

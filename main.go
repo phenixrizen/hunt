@@ -186,7 +186,7 @@ func main() {
 
 	wg.Wait()
 
-	fmt.Printf("\n%s occurences found\n", red(fmt.Sprintf("%d", found)))
+	fmt.Printf("\n%s occurrences found\n", red(fmt.Sprintf("%d", found)))
 
 	os.Exit(found)
 }

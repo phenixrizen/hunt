@@ -3,7 +3,9 @@ package main
 import (
 	"bufio"
 	"fmt"
+	"log"
 	"os"
+	"os/exec"
 	"regexp"
 	"strings"
 	"sync"
@@ -14,7 +16,7 @@ import (
 )
 
 var root, query, filenameRegEx, ignoreRegEx string
-var cFiles, goFiles, rustFiles, rubyFiles, jsFiles bool
+var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit bool
 var ignore *regexp.Regexp
 var qExpr *regexp.Regexp
 var fExprs = make([]*regexp.Regexp, 0)
@@ -40,6 +42,7 @@ func readFile(wg *sync.WaitGroup, path string) {
 			white := color.New(color.FgWhite).SprintFunc()
 			green := color.New(color.FgGreen).SprintFunc()
 			red := color.New(color.FgRed).SprintFunc()
+			yellow := color.New(color.FgYellow).SprintfFunc()
 			output := fmt.Sprintf("%s:%s    ", blue(path), green(fmt.Sprintf("%d", i)))
 			idx := 0
 			for _, match := range matches {
@@ -47,8 +50,20 @@ func readFile(wg *sync.WaitGroup, path string) {
 				idx = match[1]
 			}
 			output = fmt.Sprintf("%s%s", output, code[idx:])
-			fmt.Printf("%s\n", output)
 
+			if gitCommit {
+				gitLog, err := exec.Command("git", "log", fmt.Sprintf("-L%d,+1:%s", i, path), "--pretty=format:\"%h - %an, %ar : %s\"").CombinedOutput()
+				if err != nil {
+					log.Fatal(err)
+				}
+				logLines := strings.Split(string(gitLog), "\n")
+				if len(logLines) == 0 {
+					log.Fatal("error getting git log")
+				}
+				output = fmt.Sprintf("%s %s %s", output, green("->"), yellow("%s", logLines[0]))
+			}
+
+			fmt.Printf("%s\n", output)
 		}
 	}
 }
@@ -72,12 +87,13 @@ func main() {
 	pflag.StringVarP(&query, "query", "q", "", "regexp to match source content")
 	pflag.StringVarP(&root, "root", "r", ".", "root to start your hunt")
 	pflag.StringVarP(&filenameRegEx, "name-regexp", "n", "", "regexp to match the filename")
-	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "\\.git|vendor", "regexp to ignore matching the filename")
+	pflag.StringVarP(&ignoreRegEx, "ignore-regexp", "i", "^\\.git|^vendor", "regexp to ignore matching the filename")
 	pflag.BoolVarP(&cFiles, "c-files", "c", false, "search for c/c++ files")
 	pflag.BoolVarP(&goFiles, "go-files", "g", false, "search for Go files")
 	pflag.BoolVarP(&rustFiles, "rust-files", "s", false, "search for rust files")
 	pflag.BoolVarP(&rubyFiles, "ruby-files", "b", false, "search for ruby files")
 	pflag.BoolVarP(&jsFiles, "js-files", "j", false, "search for JavaScript files")
+	pflag.BoolVarP(&gitCommit, "git-commit", "h", false, "git the git commit details for the found line")
 	pflag.Parse()
 
 	if pflag.NFlag() == 0 || root == "" {

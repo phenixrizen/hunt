@@ -16,7 +16,7 @@ import (
 )
 
 var root, query, filenameRegEx, ignoreRegEx string
-var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit, removeCode bool
+var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit, removeCode, removeColor bool
 var ignore *regexp.Regexp
 var qExpr *regexp.Regexp
 var fExprs = make([]*regexp.Regexp, 0)
@@ -35,6 +35,7 @@ func init() {
 	pflag.BoolVarP(&jsFiles, "js-files", "j", false, "search for JavaScript files")
 	pflag.BoolVarP(&gitCommit, "git-commit", "h", false, "git the git commit details for the found line")
 	pflag.BoolVarP(&removeCode, "remove-code", "v", false, "do not show the matching line of code")
+	pflag.BoolVarP(&removeColor, "remove-color", "x", false, "do not color the code")
 	pflag.Parse()
 
 	if pflag.NFlag() == 0 || root == "" {
@@ -43,6 +44,10 @@ func init() {
 		fmt.Println("flags:")
 		pflag.PrintDefaults()
 		os.Exit(-1)
+	}
+
+	if removeColor {
+		color.NoColor = true
 	}
 }
 

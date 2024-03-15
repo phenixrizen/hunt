@@ -16,7 +16,7 @@ import (
 )
 
 var root, query, filenameRegEx, ignoreRegEx string
-var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, gitCommit, removeCode, removeColor bool
+var cFiles, goFiles, rustFiles, rubyFiles, jsFiles, pyFiles, gitCommit, removeCode, removeColor bool
 var ignore *regexp.Regexp
 var qExpr *regexp.Regexp
 var fExprs = make([]*regexp.Regexp, 0)
@@ -33,6 +33,7 @@ func init() {
 	pflag.BoolVarP(&rustFiles, "rust-files", "s", false, "search for rust files")
 	pflag.BoolVarP(&rubyFiles, "ruby-files", "b", false, "search for ruby files")
 	pflag.BoolVarP(&jsFiles, "js-files", "j", false, "search for JavaScript files")
+	pflag.BoolVarP(&pyFiles, "py-files", "p", false, "search for python files")
 	pflag.BoolVarP(&gitCommit, "git-commit", "h", false, "git the git commit details for the found line")
 	pflag.BoolVarP(&removeCode, "remove-code", "v", false, "do not show the matching line of code")
 	pflag.BoolVarP(&removeColor, "remove-color", "x", false, "do not color the code")
@@ -127,7 +128,7 @@ func main() {
 		fExprs = append(fExprs, expr)
 	}
 
-	if cFiles || goFiles || rustFiles || rubyFiles || jsFiles {
+	if cFiles || goFiles || rustFiles || rubyFiles || jsFiles || pyFiles {
 		if cFiles {
 			expr, err := compExp(".c$|.h$|.cpp$|.hpp$")
 			checkErr(err)
@@ -149,7 +150,12 @@ func main() {
 			fExprs = append(fExprs, expr)
 		}
 		if jsFiles {
-			expr, err := compExp(".js$")
+			expr, err := compExp(".js$|.ts$|.jsx$|.tsx$")
+			checkErr(err)
+			fExprs = append(fExprs, expr)
+		}
+		if pyFiles {
+			expr, err := compExp(".py$")
 			checkErr(err)
 			fExprs = append(fExprs, expr)
 		}

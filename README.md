@@ -13,6 +13,7 @@ flags:
   -i, --ignore-regexp string   regexp to ignore matching the filename (default "\\.git")
   -j, --js-files               search for JavaScript files
   -n, --name-regexp string     regexp to match the filename
+  -p, --python-files            search for pyhton files
   -q, --query string           regexp to match source content
   -r, --root string            root to start your hunt (default ".")
   -b, --ruby-files             search for ruby files
@@ -21,7 +22,7 @@ flags:
 
 ### Install
 ```bash
-$ go install github.com/phenixrizen/hunt
+$ go install github.com/phenixrizen/hunt@latest
 ```
 
 ### Examples
